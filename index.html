@@ -33,6 +33,30 @@
     </style>
 </head>
 <body class="bg-gray-50">
+
+    <!-- Password Modal -->
+    <div id="passwordModal" class="fixed inset-0 bg-gray-900 bg-opacity-80 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-sm mx-4">
+            <div class="text-center mb-6">
+                <div class="text-4xl mb-3">🔒</div>
+                <h2 class="text-xl font-semibold text-gray-800">Protected Access</h2>
+                <p class="text-gray-500 text-sm mt-1">Enter the password to continue</p>
+            </div>
+            <div class="space-y-4">
+                <input id="passwordInput"
+                       type="password"
+                       placeholder="Password"
+                       class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                >
+                <button id="passwordSubmit"
+                        class="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-medium"
+                >
+                    Unlock
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div class="max-w-4xl mx-auto h-screen flex flex-col">
         <!-- Header -->
         <div class="bg-purple-600 text-white p-4 shadow-lg">
@@ -98,6 +122,28 @@
     </div>
 
     <script>
+        let enteredPassword = null;
+
+        (function() {
+            const modal = document.getElementById('passwordModal');
+            const input = document.getElementById('passwordInput');
+            const submitBtn = document.getElementById('passwordSubmit');
+
+            document.body.style.overflow = 'hidden';
+
+            function tryUnlock() {
+                if (input.value.trim() === '') return;
+                enteredPassword = input.value;
+                modal.remove();
+                document.body.style.overflow = '';
+            }
+
+            submitBtn.addEventListener('click', tryUnlock);
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') tryUnlock();
+            });
+        })();
+
         const CHAT_API_URL = 'https://btacb757ahf2zvq7earzphuqtq0ucsvr.lambda-url.eu-central-1.on.aws/'; // replace with API Gateway URL in production
 
         const messagesDiv = document.getElementById('messages');
@@ -182,11 +228,12 @@
             fetch(CHAT_API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                message, 
+                body: JSON.stringify({
+                message,
                 conversation_history: conversationHistory,
                 session_id: sessionId,
-                user_id: userId
+                user_id: userId,
+                password: enteredPassword
                 })
             })
             .then(function(response) {
