@@ -106,9 +106,16 @@
         const clearBtn = document.getElementById('clearBtn');
         const refreshBtn = document.getElementById('refreshBtn');
         const dataStatus = document.getElementById('dataStatus');
+        const sessionId = crypto.randomUUID(); 
 
         let isLoading = false;
         let conversationHistory = [];
+
+        let userId = localStorage.getItem('chatUserId');
+        if (!userId) {
+            userId = crypto.randomUUID();
+            localStorage.setItem('chatUserId', userId);
+        }
 
         function addMessage(content, isUser = false) {
             const messageDiv = document.createElement('div');
@@ -175,7 +182,12 @@
             fetch(CHAT_API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message, conversation_history: conversationHistory })
+                body: JSON.stringify({ 
+                message, 
+                conversation_history: conversationHistory,
+                session_id: sessionId,
+                user_id: userId
+                })
             })
             .then(function(response) {
                 return response.json().then(function(data) {
